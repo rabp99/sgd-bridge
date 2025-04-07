@@ -36,11 +36,17 @@ class SignatureController extends Controller
 
         $token = $response->body();
 
+        $idRegistro = $request->id_registro;
+        $areaIdDoc = $request->area_id_doc;
+
+        $documentTosignURL = 'http://localhost:8080/SISTRAMDOC/generate-pdf.php?id_registro=' . $idRegistro . '&area_id_doc=' . $areaIdDoc;
+        $uploadURL = 'http://localhost:8080/SISTRAMDOC/upload-pdf.php?id_registro=' . $idRegistro;
+
         $data = [
             "signatureFormat" => "PAdES",
             "signatureLevel" => 'B',
             "signaturePackaging" => "enveloped",
-            "documentToSign" => url('test-firma-peru/test.pdf'),
+            "documentToSign" => $documentTosignURL,
             "certificateFilter" => ".*",
             "webTsa" => "",
             "userTsa" => "",
@@ -52,14 +58,14 @@ class SignatureController extends Controller
             "bachtOperation" => false,
             "oneByOne" => true,
             "signatureStyle" => 1,
-            "imageToStamp" => url('test-firma-peru/stamp.png'),
+            "imageToStamp" => asset('top-secret-stamp.png'),
             "stampTextSize" => 14,
             "stampWordWrap" => 37,
             "role" => 'Analista de Servicios',
             "stampPage" => 1,
             "positionx" => 20,
             "positiony" => 20,
-            "uploadDocumentSigned" => url('test-firma-peru/upload.php'),
+            "uploadDocumentSigned" => $uploadURL,
             'certificationSignature' => false,
             'token' => $token
         ];

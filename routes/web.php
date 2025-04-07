@@ -1,14 +1,15 @@
 <?php
 
-use Artisaninweb\SoapWrapper\SoapWrapper;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Http;
+use App\Http\Controllers\SignatureController;
 
 
 Route::get('/', function () {
     return view('welcome');
 });
 
+Route::post('sign', [SignatureController::class, 'sign'])->name('sign');
 
 Route::get('test', function () {
     $url = "https://ws2.pide.gob.pe/Rest/Pcm/ListaEntidad?sidcatent=01&out=json";
