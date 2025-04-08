@@ -2,76 +2,44 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Services\CuoService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
 class CuoController extends Controller
 {
+    protected CuoService $cuoService;
+
+    public function __construct(CuoService $cuoService)
+    {
+        $this->cuoService = $cuoService;
+    }
+
     public function getCuoTest(Request $request)
     {
-        $url = "https://ws2.pide.gob.pe/Rest/PCM/CTest?out=json";
-
         try {
-            $payload = [
-                "PIDE" => [
-                    "ruc" => $request->ruc,
-                    "servicio" => $request->servicio,
-                ]
-            ];
-
-            $response = Http::withHeaders([
-                'Content-Type' => 'application/json; charset=UTF-8'
-            ])
-                ->post($url, $payload);
-            if ($response->successful()) {
-                $data = $response->json();
-                if ($cuo = $data['getCUOResponse']['return']['$']) {
-                    return response()->json([
-                        'cuo' => $cuo
-                    ]);
-                }
-                return response()->json([
-                    'error' => true,
-                    'message' => 'No se pudo obtener el CUO.'
-                ], 400);
-            }
+            $cuo = $this->cuoService->getCuoTest($request->ruc, $request->servicio);
+            return response()->json(['cuo' => $cuo]);
         } catch (\Throwable $th) {
             logger($th);
-            throw $th;
+            return response()->json([
+                'error' => true,
+                'message' => 'No se pudo obtener el CUO.'
+            ], 400);
         }
     }
 
     public function getCuoEntidad(Request $request)
     {
-        $url = "https://ws2.pide.gob.pe/Rest/PCM/CEntidad?out=json";
-
         try {
-            $payload = [
-                "PIDE" => [
-                    "ruc" => $request->ruc,
-                    "servicio" => $request->servicio,
-                ]
-            ];
-
-            $response = Http::withHeaders([
-                'Content-Type' => 'application/json; charset=UTF-8'
-            ])
-                ->post($url, $payload);
-            if ($response->successful()) {
-                $data = $response->json();
-                if ($cuo = $data['getCUOResponse']['return']['$']) {
-                    return response()->json([
-                        'cuo' => $cuo
-                    ]);
-                }
-                return response()->json([
-                    'error' => true,
-                    'message' => 'No se pudo obtener el CUO.'
-                ], 400);
-            }
+            $cuo = $this->cuoService->getCuoEntidad($request->ruc, $request->servicio);
+            return response()->json(['cuo' => $cuo]);
         } catch (\Throwable $th) {
             logger($th);
-            throw $th;
+            return response()->json([
+                'error' => true,
+                'message' => 'No se pudo obtener el CUO.'
+            ], 400);
         }
     }
 }

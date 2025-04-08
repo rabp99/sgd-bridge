@@ -25,14 +25,40 @@ class CuoService
             if ($response->successful()) {
                 $data = $response->json();
                 if ($cuo = $data['getCUOResponse']['return']['$']) {
-                    return response()->json([
-                        'cuo' => $cuo
-                    ]);
+                    return $cuo;
                 }
-                return response()->json([
-                    'error' => true,
-                    'message' => 'No se pudo obtener el CUO.'
-                ], 400);
+
+                throw new \Exception('No se pudo obtener el CUO.');
+            }
+        } catch (\Throwable $th) {
+            logger($th);
+            throw $th;
+        }
+    }
+
+    public function getCuoEntidad($ruc, $servicio)
+    {
+        $url = "https://ws2.pide.gob.pe/Rest/PCM/CEntidad?out=json";
+
+        try {
+            $payload = [
+                "PIDE" => [
+                    "ruc" => $ruc,
+                    "servicio" => $servicio,
+                ]
+            ];
+
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json; charset=UTF-8'
+            ])
+                ->post($url, $payload);
+            if ($response->successful()) {
+                $data = $response->json();
+                if ($cuo = $data['getCUOResponse']['return']['$']) {
+                    return $cuo;
+                }
+
+                throw new \Exception('No se pudo obtener el CUO.');
             }
         } catch (\Throwable $th) {
             logger($th);

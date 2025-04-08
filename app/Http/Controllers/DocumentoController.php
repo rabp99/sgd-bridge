@@ -2,17 +2,23 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Services\CuoService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Artisaninweb\SoapWrapper\SoapWrapper;
 
 class DocumentoController extends Controller
 {
-    protected $soapWrapper;
+    protected SoapWrapper $soapWrapper;
 
-    public function __construct(SoapWrapper $soapWrapper)
-    {
+    protected CuoService $cuoService;
+
+    public function __construct(
+        SoapWrapper $soapWrapper,
+        CuoService $cuoService
+    ) {
         $this->soapWrapper = $soapWrapper;
+        $this->cuoService = $cuoService;
     }
 
     public function cargoTramite(Request $request) {}
@@ -134,23 +140,23 @@ class DocumentoController extends Controller
                     "vrucentrec" => '20175639391',
                     "vnomentemi" => 'TRANSPORTES METROPOLITANOS DE TRUJILLO',
                     "vuniorgrem" => 'GERENCIA GENERAL',
-                    "vcuo" => $request->vcuo,
-                    "vcuoref" => $request->vcuoref,
-                    "ccodtipdoc" => $request->ccodtipdoc,
-                    "vnumdoc" => $request->vnumdoc,
-                    "dfecdoc" => $request->dfecdoc,
-                    "vuniorgdst" => $request->vuniorgdst,
-                    "vnomdst" => $request->vnomdst,
-                    "vnomcardst" => $request->vnomcardst,
-                    "vasu" => $request->vasu,
-                    "snumanx" => $request->snumanx,
-                    "snumfol" => $request->snumfol,
+                    "vcuo" => $this->cuoService->getCuoTest("20175639391", "1"),
+                    "vcuoref" => "",
+                    "ccodtipdoc" => '01',
+                    "vnumdoc" => '1',
+                    "dfecdoc" => '2025-04-04T15:21:48.857-05:00',
+                    "vuniorgdst" => 'GERENCIA MUNICIPAL',
+                    "vnomdst" => 'MARIO REYNA',
+                    "vnomcardst" => 'ALCALDE',
+                    "vasu" => 'OFICIO DE PRUEBA',
+                    "snumanx" => 0,
+                    "snumfol" => 1,
                     "bpdfdoc" => '',
-                    "vnomdoc" => $request->vnomdoc,
-                    "vnomdoc2" => $request->vnomdoc2,
-                    "vurldocanx" => $request->vurldocanx,
-                    "ctipdociderem" => $request->ctipdociderem,
-                    "vnumdociderem" => $request->vnumdociderem
+                    "vnomdoc" => 'DOCUMENTO.pdf',
+                    "vnomdoc2" => '',
+                    "vurldocanx" => '',
+                    "ctipdociderem" => '1',
+                    "vnumdociderem" => '45415710'
                 ]
             ];
 
