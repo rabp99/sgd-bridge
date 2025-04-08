@@ -1,88 +1,33 @@
 <?php
 
+use Artisaninweb\SoapWrapper\SoapWrapper;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Http;
 use App\Http\Controllers\SignatureController;
-
+use App\Http\Controllers\EntidadController;
+use App\Http\Controllers\CuoController;
+use App\Http\Controllers\DocumentoController;
 
 Route::get('/', function () {
     return view('welcome');
 });
 
-Route::post('sign', [SignatureController::class, 'sign'])->name('sign');
+Route::get('/sign', [SignatureController::class, 'sign'])->name('sign');
 
-Route::get('test', function () {
-    $url = "https://ws2.pide.gob.pe/Rest/Pcm/ListaEntidad?sidcatent=01&out=json";
+Route::get('/entidad/get-list/{sidcatent}', [EntidadController::class, 'getList'])->name('entidad.get-list');
 
-    try {
-        $response = Http::withHeaders([
-            'Content-Type' => 'application/json; charset=UTF-8'
-        ])
-            ->timeout(300000)
-            ->get($url);
-        dd($response->body());
-    } catch (\Throwable $e) {
-        dd($e);
-    }
-});
-/*
-Route::get('test', function () {
-    $wsdl = "https://ws2.pide.gob.pe/services/PcmIMgdEntidad?wsdl";
+Route::get('/entidad/validate/{vrucent}', [EntidadController::class, 'validate'])->name('entidad.get-list');
 
-    try {
-        $options = [
-            'trace'    => 1, // Para obtener más detalles en la respuesta
-            'exceptions' => true,
-            'stream_context' => stream_context_create([
-                'http' => [
-                    'timeout' => 180 // Tiempo de espera en segundos
-                ]
-            ])
-        ];
-        $client = new \SoapClient($wsdl, $options);
+Route::get('/cuo/get-cuo-test/{ruc}/{servicio}', [CuoController::class, 'getCuoTest'])->name('cuo.get-cuo-test');
 
-        $response = $client->getListaEntidad(['sidcatent' => '01']);
-        dd($response);
-    } catch (\SoapFault $e) {
-        dd($e);
-    }
-});
-*/
-/*
-Route::get('test', function (SoapWrapper $soapWrapper) {
-    try {
-        $soapWrapper->add('Entidad', function ($service) {
-            $service
-                ->wsdl('http://mpv-iotd.gobiernodigital.gob.pe/wsentidad/Entidad?wsdl')
-                ->trace(true)
-                ->options([
-                    'soap_version' => SOAP_1_2,
-                    'exceptions' => true,
-                    'cache_wsdl' => WSDL_CACHE_NONE,
-                    'connection_timeout' => 30, // Asegurar tiempo de espera adecuado
-                    'stream_context' => stream_context_create([
-                        'http' => [
-                            'user_agent' => 'PHPSoapClient',
-                            'timeout' => 30
-                        ]
-                    ])
-                ]);
-        });
+Route::get('/cuo/get-cuo-entidad/{ruc}/{servicio}', [CuoController::class, 'getCuoEntidad'])->name('cuo.get-cuo-entidad');
 
-        $response = $soapWrapper->call('Entidad.getListaEntidad', ['sidcatent' => '1']);
-        dd($response);
-    } catch (\Throwable $th) {
-        dd($th);
-    }
-});
-*/
-/*
-Route::get('test', function (SoapWrapper $soapWrapper) {
-    try {
-        $client = new \SoapClient('http://mpv-iotd.gobiernodigital.gob.pe/wsentidad/Entidad?wsdl');
-        dd($client->__getFunctions()); // Esto lista los métodos disponibles
-    } catch (\SoapFault $e) {
-        dd($e->getMessage());
-    }
-});
-*/
+// Route::post('/documentos/cargo-tramite', [DocumentoController::class, 'cargoTramite'])->name('documento.cargo-tramite');
+
+// Route::get('/documentos/consultar-tramite', [CuoController::class, 'getCuoEntidad'])->name('cuo.get-cuo-entidad');
+
+Route::get('/documento/tipo-documento', [DocumentoController::class, 'getTipos'])->name('documento.get-tipos');
+
+Route::post('/documentos/recepcionar-tramite', [DocumentoController::class, 'recepcionarTramite'])->name('documento.recepcionar-tramite');
+
+Route::get('/documentos/test-recepcionar-tramite', [DocumentoController::class, 'testRecepcionarTramite'])->name('documento.test-recepcionar-tramite');
