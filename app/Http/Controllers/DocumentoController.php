@@ -6,6 +6,7 @@ use App\Http\Services\CuoService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 use Artisaninweb\SoapWrapper\SoapWrapper;
+use Illuminate\Support\Facades\Storage;
 
 class DocumentoController extends Controller
 {
@@ -133,6 +134,10 @@ class DocumentoController extends Controller
 
         $client = new \SoapClient($url);
 
+        $path = 'app/private/test.pdf';
+        $fileContent = Storage::get($path);
+        $base64 = base64_encode($fileContent);
+
         try {
             $payload = [
                 "request" => [
@@ -151,7 +156,7 @@ class DocumentoController extends Controller
                     "vasu" => 'OFICIO DE PRUEBA',
                     "snumanx" => 0,
                     "snumfol" => 1,
-                    "bpdfdoc" => '',
+                    "bpdfdoc" => $base64,
                     "vnomdoc" => 'DOCUMENTO.pdf',
                     "vnomdoc2" => '',
                     "vurldocanx" => '',
