@@ -130,8 +130,8 @@ class DocumentoController extends Controller
 
     public function testRecepcionarTramite(Request $request)
     {
-        $url = "http://mpv-iotd.gobiernodigital.gob.pe/wsiopidetramite/IOTramite?wsdl";
-
+        // $url = 'https://ws2.pide.gob.pe/services/PcmIMgdTramite?wsdl';
+        $url = 'https://ws1.pide.gob.pe/services/PcmEnvioPrueba?wsdl';
         $client = new \SoapClient($url);
 
         $path = 'app/private/test.pdf';
@@ -141,8 +141,8 @@ class DocumentoController extends Controller
         try {
             $payload = [
                 "request" => [
-                    "vrucentrem" => '20477412549',
-                    "vrucentrec" => '20175639391',
+                    "vrucentrem" => '11111111111',
+                    "vrucentrec" => '22222222222',
                     "vnomentemi" => 'TRANSPORTES METROPOLITANOS DE TRUJILLO',
                     "vuniorgrem" => 'GERENCIA GENERAL',
                     "vcuo" => $this->cuoService->getCuoTest("20175639391", "1"),
