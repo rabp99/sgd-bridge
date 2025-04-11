@@ -12,7 +12,7 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/sign', [SignatureController::class, 'sign'])->name('sign');
+Route::post('/sign', [SignatureController::class, 'sign'])->name('sign');
 
 Route::get('/entidad/get-list/{sidcatent}', [EntidadController::class, 'getList'])->name('entidad.get-list');
 
