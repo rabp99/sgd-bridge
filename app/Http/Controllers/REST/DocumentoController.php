@@ -1,25 +1,26 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\REST;
 
 use App\Http\Services\CuoService;
+use App\Http\Services\EntidadService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
-use Artisaninweb\SoapWrapper\SoapWrapper;
 use Illuminate\Support\Facades\Storage;
+use App\Http\Controllers\Controller;
 
 class DocumentoController extends Controller
 {
-    protected SoapWrapper $soapWrapper;
-
     protected CuoService $cuoService;
 
+    protected EntidadService $entidadService;
+
     public function __construct(
-        SoapWrapper $soapWrapper,
-        CuoService $cuoService
+        CuoService $cuoService,
+        EntidadService $entidadService
     ) {
-        $this->soapWrapper = $soapWrapper;
         $this->cuoService = $cuoService;
+        $this->entidadService = $entidadService;
     }
 
     public function cargoTramite(Request $request)
@@ -68,33 +69,37 @@ class DocumentoController extends Controller
 
     public function consultarTramite(Request $request)
     {
-        $url = "https://ws2.pide.gob.pe/Rest/Pcm/ConsultarTramite?out=json";
+        $request->validate([
+            'vcuo' => 'nullable|string',
+        ]);
+
+        // $url = "https://ws2.pide.gob.pe/Rest/Pcm/ConsultarTramite?out=json";
+        $url = 'http://wildfly:8080/wsiotramite/Tramite?wsdl';
+        $client = new \SoapClient($url, [
+            'trace' => 1,
+            'exceptions' => true
+        ]);
 
         try {
             $payload = [
-                'PIDE' => [
-                    'vrucentrem' => $request->vrucentrem,
-                    'vrucentrec' => $request->vrucentrec,
-                    'vcuo' => $request->vcuo,
-                ]
+                'request' => $request->vcuo
             ];
-            $response = Http::withHeaders([
-                'Content-Type' => 'application/json; charset=UTF-8'
-            ])
-                ->post($url, $payload);
-            if ($response->successful()) {
-                $data = $response->json();
-                dd($data);
-                /*
-                if ($data['getTipoDocumentoResponse']) {
-                    return response()->json($data['getTipoDocumentoResponse']['return']);
-                }
-                */
+
+            $response = $client->consultarTramiteResponse($payload);
+            $return = $response->return;
+
+            if ($return->vcodres === '0000') {
                 return response()->json([
-                    'error' => true,
-                    'message' => 'No hubo respuesta de la consulta.'
-                ], 400);
+                    'result' => true,
+                    'message' => $return->vdesres,
+                    'cflgest' => $return->cflgest
+                ]);
             }
+
+            return response()->json([
+                'result' => false,
+                'message' => 'La consulta no encontró el documento.'
+            ]);
         } catch (\Throwable $th) {
             logger($th);
             throw $th;
@@ -126,14 +131,22 @@ class DocumentoController extends Controller
         }
     }
 
-    /*
-    public function recepcionarTramite(Request $request) {
+    public function recepcionarTramite(Request $request)
+    {
         $request->validate([
             'vrucentrem' => 'required|string',
-            'vrucentrec' => 'required|string',
+            'vrucentrec' => [
+                'required',
+                'string',
+                function ($attribute, $value, $fail) {
+                    $isValid = $this->entidadService->validate($value);
+                    if (!$isValid) {
+                        $fail("El RUC de la entidad receptora no es válido.");
+                    }
+                },
+            ],
             'vnomentemi' => 'required|string',
             'vuniorgrem' => 'required|string',
-            'vcuo' => 'required|string',
             'vcuoref' => 'nullable|string',
             'ccodtipdoc' => 'required|string',
             'vnumdoc' => 'required|string',
@@ -146,23 +159,42 @@ class DocumentoController extends Controller
             'snumfol' => 'required|integer|min:0',
             'bpdfdoc' => 'required|file',
             'vnomdoc' => 'required|string',
-            'vnomdoc2' => 'nullable|string',
+            'lstanexos' => [
+                'nullable',
+                'array',
+                function ($attribute, $value, $fail) {
+                    foreach ($value as $item) {
+                        if (!is_array($item) || !isset($item['vnomdoc'])) {
+                            $fail("Cada elemento de {$attribute} debe ser un array con el campo 'vnomdoc'.");
+                        }
+                    }
+                },
+            ],
             'vurldocanx' => 'nullable|url',
             'ctipdociderem' => 'required|in:1,2',
             'vnumdociderem' => 'required|string',
         ]);
 
-        // $url = "https://ws2.pide.gob.pe/Rest/Pcm/RecepcionarTramite?out=json";
-        $url = "https://ws2.pide.gob.pe/Rest/Pcm/RecepcionarTramite?out=json";
-        
+        // $url = "https://ws2.pide.gob.pe/services/PcmIMgdTramite?wsdl";
+        $nginxIp = trim(shell_exec("getent hosts sgd-bridge-nginx | awk '{ print $1 }'"));
+        $url = 'http://' . $nginxIp . '/wsiotramite/Tramite?wsdl';
+
+        $client = new \SoapClient($url, [
+            'trace' => 1,
+            'exceptions' => true
+        ]);
+
+        $rucEntidadReceptora = $request->vrucentrem;
+        $vcuo = $this->cuoService->getCuoEntidad($rucEntidadReceptora, "1");
+
         try {
             $payload = [
-                "PIDE" => [
+                "receptionRequest" => [
                     "vrucentrem" => $request->vrucentrem,
-                    "vrucentrec" => $request->vrucentrec,
+                    "vrucentrec" => $rucEntidadReceptora,
                     "vnomentemi" => $request->vnomentemi,
                     "vuniorgrem" => $request->vuniorgrem,
-                    "vcuo" => $request->vcuo,
+                    "vcuo" => $vcuo,
                     "vcuoref" => $request->vcuoref,
                     "ccodtipdoc" => $request->ccodtipdoc,
                     "vnumdoc" => $request->vnumdoc,
@@ -175,76 +207,27 @@ class DocumentoController extends Controller
                     "snumfol" => $request->snumfol,
                     "bpdfdoc" => base64_encode(file_get_contents($request->file('bpdfdoc')->getRealPath())),
                     "vnomdoc" => $request->vnomdoc,
-                    "vnomdoc2" => $request->vnomdoc2,
+                    'lstanexos' => $request->lstanexos,
                     "vurldocanx" => $request->vurldocanx,
                     "ctipdociderem" => $request->ctipdociderem,
                     "vnumdociderem" => $request->vnumdociderem
                 ]
             ];
 
-            $response = Http::withHeaders([
-                'Content-Type' => 'application/json; charset=UTF-8'
-            ])
-                ->post($url, null);
-            if ($response->successful()) {
-                $data = $response->json();
-                if ($data['getTipoDocumentoResponse']) {
-                    return response()->json($data['getTipoDocumentoResponse']['return']);
-                }
-                return response()->json([
-                    'error' => true,
-                    'message' => 'No se encontraron tipo de documentos.'
-                ], 400);
-            }
-        } catch (\Throwable $th) {
-            logger($th);
-            throw $th;
-        }
-    }
-    */
-
-    public function testRecepcionarTramite(Request $request)
-    {
-        // $url = 'https://ws2.pide.gob.pe/services/PcmIMgdTramite?wsdl';
-        $url = 'https://ws1.pide.gob.pe/services/PcmEnvioPrueba?wsdl';
-        $client = new \SoapClient($url, [
-            'trace' => 1,
-            'exceptions' => true
-        ]);
-
-        $path = 'test.pdf';
-        $fileContent = Storage::get($path);
-        $base64 = base64_encode($fileContent);
-
-        try {
-            $payload = [
-                "request" => [
-                    "vrucentrem" => '11111111111',
-                    "vrucentrec" => '22222222222',
-                    "vnomentemi" => 'TRANSPORTES METROPOLITANOS DE TRUJILLO',
-                    "vuniorgrem" => 'GERENCIA GENERAL',
-                    "vcuo" => $this->cuoService->getCuoTest("22222222222", "1"),
-                    "vcuoref" => "",
-                    "ccodtipdoc" => '01',
-                    "vnumdoc" => '1',
-                    "dfecdoc" => '2025-04-09T15:21:48.857-05:00',
-                    "vuniorgdst" => 'GERENCIA MUNICIPAL',
-                    "vnomdst" => 'MARIO REYNA',
-                    "vnomcardst" => 'ALCALDE',
-                    "vasu" => 'OFICIO DE PRUEBA',
-                    "snumanx" => 0,
-                    "snumfol" => 1,
-                    "bpdfdoc" => $base64,
-                    "vnomdoc" => 'test.pdf',
-                    "vnomdoc2" => '',
-                    "vurldocanx" => '',
-                    "ctipdociderem" => '1',
-                    "vnumdociderem" => '41461797'
-                ]
-            ];
-
             $response = $client->recepcionarTramiteResponse($payload);
-            dd($response);
+            $return = $response->return;
+            if ($return->vcodres === '0000') {
+                return response()->json([
+                    'result' => true,
+                    'message' => $return->vdesres,
+                    'vcuo' => $vcuo
+                ]);
+            }
+
+            return response()->json([
+                'result' => false,
+                'message' => 'No se pudo recepcionar el documento.'
+            ]);
         } catch (\Throwable $th) {
             logger($th);
             throw $th;

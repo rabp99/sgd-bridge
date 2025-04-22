@@ -1,20 +1,19 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Services;
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
 
-class EntidadController extends Controller
+class EntidadService
 {
-    public function getList(Request $request)
+    public function getList($sidcatent)
     {
         $url = "https://ws2.pide.gob.pe/Rest/Pcm/ListaEntidad?out=json";
 
         try {
             $payload = [
                 "PIDE" => [
-                    "sidcatent" => $request->sidcatent
+                    "sidcatent" => $sidcatent
                 ]
             ];
 
@@ -25,12 +24,9 @@ class EntidadController extends Controller
             if ($response->successful()) {
                 $data = $response->json();
                 if ($data['getListaEntidadResponse']) {
-                    return response()->json($data['getListaEntidadResponse']['return']);
+                    return $data['getListaEntidadResponse']['return'];
                 }
-                return response()->json([
-                    'error' => true,
-                    'message' => 'No se encontraron entidades.'
-                ], 400);
+                throw new \Exception('No se pudo obtener la lista de Entidades.');
             }
         } catch (\Throwable $th) {
             logger($th);
@@ -38,14 +34,14 @@ class EntidadController extends Controller
         }
     }
 
-    public function validate(Request $request)
+    public function validate($vrucent)
     {
         $url = 'https://ws2.pide.gob.pe/Rest/Pcm/ValidarEntidad?out=json';
 
         try {
             $payload = [
                 "PIDE" => [
-                    "vrucent" => $request->vrucent
+                    "vrucent" => $vrucent
                 ]
             ];
 
@@ -56,13 +52,9 @@ class EntidadController extends Controller
             if ($response->successful()) {
                 $data = $response->json();
                 if ($data['validarEntidadResponse']['return'] === '0000') {
-                    return response()->json([
-                        'response' => true
-                    ]);
+                    return true;
                 }
-                return response()->json([
-                    'response' => false
-                ]);
+                return false;
             }
         } catch (\Throwable $th) {
             logger($th);

@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\REST;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
+use App\Http\Controllers\Controller;
 
 class SignatureController extends Controller
 {
@@ -54,14 +55,14 @@ class SignatureController extends Controller
             "theme" => "claro",
             "visiblePosition" => true,
             "contactInfo" => "",
-            "signatureReason" => "Soy el autor de este documento",
+            "signatureReason" => "Soy el autor de este documento", // here
             "bachtOperation" => false,
             "oneByOne" => true,
             "signatureStyle" => 1,
-            "imageToStamp" => asset('top-secret-stamp.png'),
+            "imageToStamp" => asset('top-secret-stamp.png'), // here
             "stampTextSize" => 14,
             "stampWordWrap" => 37,
-            "role" => 'Analista de Servicios',
+            "role" => 'Analista de Servicios', // here
             "stampPage" => 1,
             "positionx" => 20,
             "positiony" => 20,
