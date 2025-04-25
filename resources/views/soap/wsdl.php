@@ -55,11 +55,11 @@ echo "<?xml version='1.0' encoding='UTF-8'?>";
 
       <xs:complexType name="consultarTramiteResponse">
         <xs:sequence>
-          <xs:element minOccurs="0" name="request" type="tns:ConsultarTramite" />
+          <xs:element minOccurs="0" name="request" type="tns:ConsultaTramite" />
         </xs:sequence>
       </xs:complexType>
 
-      <xs:complexType name="ConsultarTramite">
+      <xs:complexType name="ConsultaTramite">
         <xs:sequence>
           <xs:element minOccurs="0" name="vrucentrem" type="xs:string" />
           <xs:element minOccurs="0" name="vrucentrec" type="xs:string" />

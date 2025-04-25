@@ -70,11 +70,18 @@ class DocumentoController extends Controller
     public function consultarTramite(Request $request)
     {
         $request->validate([
-            'vcuo' => 'nullable|string',
+            'vrucentrem' => 'required|string',
+            'vrucentrec' => 'required|string',
+            'vcuo' => 'required|string',
         ]);
 
-        // $url = "https://ws2.pide.gob.pe/Rest/Pcm/ConsultarTramite?out=json";
-        $url = 'http://wildfly:8080/wsiotramite/Tramite?wsdl';
+        if (env('APP_ENV') === 'local') {
+            $nginxIp = trim(shell_exec("getent hosts sgd-bridge-nginx | awk '{ print $1 }'"));
+            $url = 'http://' . $nginxIp . '/wsiotramite/Tramite?wsdl';
+        } else {
+            $url = "https://ws2.pide.gob.pe/services/PcmIMgdTramite?wsdl";
+        }
+
         $client = new \SoapClient($url, [
             'trace' => 1,
             'exceptions' => true
@@ -82,7 +89,11 @@ class DocumentoController extends Controller
 
         try {
             $payload = [
-                'request' => $request->vcuo
+                'request' => [
+                    'vrucentrem' => $request->vrucentrem,
+                    'vrucentrec' =>  $request->vrucentrec,
+                    'vcuo' => $request->vcuo
+                ]
             ];
 
             $response = $client->consultarTramiteResponse($payload);
@@ -92,14 +103,23 @@ class DocumentoController extends Controller
                 return response()->json([
                     'result' => true,
                     'message' => $return->vdesres,
-                    'cflgest' => $return->cflgest
+                    'vcuo' => $return->vcuo,
+                    'vcuoref' => $return->vcuoref,
+                    'vnumregstd' => $return->vnumregstd,
+                    'vanioregstd' => $return->vanioregstd,
+                    'vuniorgstd' => $return->vuniorgstd,
+                    'dfecregstd' => $return->dfecregstd,
+                    'vusuregstd' => $return->vusuregstd,
+                    'bcarstd' => $return->bcarstd,
+                    'vobs' => $return->vobs,
+                    'cflgest' => $return->cflgest,
                 ]);
             }
 
             return response()->json([
                 'result' => false,
                 'message' => 'La consulta no encontró el documento.'
-            ]);
+            ], 500);
         } catch (\Throwable $th) {
             logger($th);
             throw $th;
@@ -139,6 +159,9 @@ class DocumentoController extends Controller
                 'required',
                 'string',
                 function ($attribute, $value, $fail) {
+                    if (env('APP_ENV') === 'local') {
+                        return true;
+                    }
                     $isValid = $this->entidadService->validate($value);
                     if (!$isValid) {
                         $fail("El RUC de la entidad receptora no es válido.");
@@ -175,9 +198,12 @@ class DocumentoController extends Controller
             'vnumdociderem' => 'required|string',
         ]);
 
-        // $url = "https://ws2.pide.gob.pe/services/PcmIMgdTramite?wsdl";
-        $nginxIp = trim(shell_exec("getent hosts sgd-bridge-nginx | awk '{ print $1 }'"));
-        $url = 'http://' . $nginxIp . '/wsiotramite/Tramite?wsdl';
+        if (env('APP_ENV') === 'local') {
+            $nginxIp = trim(shell_exec("getent hosts sgd-bridge-nginx | awk '{ print $1 }'"));
+            $url = 'http://' . $nginxIp . '/wsiotramite/Tramite?wsdl';
+        } else {
+            $url = "https://ws2.pide.gob.pe/services/PcmIMgdTramite?wsdl";
+        }
 
         $client = new \SoapClient($url, [
             'trace' => 1,
@@ -185,11 +211,16 @@ class DocumentoController extends Controller
         ]);
 
         $rucEntidadReceptora = $request->vrucentrem;
-        $vcuo = $this->cuoService->getCuoEntidad($rucEntidadReceptora, "1");
+        $vcuo = null;
+        if (env('APP_ENV') === 'local') {
+            $vcuo = '123456789';
+        } else {
+            $vcuo = $this->cuoService->getCuoEntidad($rucEntidadReceptora, "1");
+        }
 
         try {
             $payload = [
-                "receptionRequest" => [
+                "request" => [
                     "vrucentrem" => $request->vrucentrem,
                     "vrucentrec" => $rucEntidadReceptora,
                     "vnomentemi" => $request->vnomentemi,
@@ -202,7 +233,7 @@ class DocumentoController extends Controller
                     "vuniorgdst" => $request->vuniorgdst,
                     "vnomdst" => $request->vnomdst,
                     "vnomcardst" => $request->vnomcardst,
-                    "vasu" => $request->vasu,
+                    "vasu" => utf8_encode($request->vasu),
                     "snumanx" => $request->snumanx,
                     "snumfol" => $request->snumfol,
                     "bpdfdoc" => base64_encode(file_get_contents($request->file('bpdfdoc')->getRealPath())),
@@ -216,6 +247,7 @@ class DocumentoController extends Controller
 
             $response = $client->recepcionarTramiteResponse($payload);
             $return = $response->return;
+
             if ($return->vcodres === '0000') {
                 return response()->json([
                     'result' => true,
@@ -223,11 +255,10 @@ class DocumentoController extends Controller
                     'vcuo' => $vcuo
                 ]);
             }
-
             return response()->json([
                 'result' => false,
                 'message' => 'No se pudo recepcionar el documento.'
-            ]);
+            ], 500);
         } catch (\Throwable $th) {
             logger($th);
             throw $th;
