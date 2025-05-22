@@ -20,7 +20,7 @@ echo "<?xml version='1.0' encoding='UTF-8'?>";
 
       <xs:complexType name="cargoResponse">
         <xs:sequence>
-          <xs:element name="cargoRequest" type="tns:CargoTramite" />
+          <xs:element name="request" type="tns:CargoTramite" />
         </xs:sequence>
       </xs:complexType>
 

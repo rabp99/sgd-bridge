@@ -3,21 +3,40 @@
 namespace App\Http\Services;
 
 use App\Soap\Types\RespuestaConsultaTramite;
+use App\Soap\Types\RespuestaCargoTramite;
 use App\Soap\Types\RespuestaTramite;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Mail\Message;
 
 class TramiteService
 {
-
     public function cargoResponse($params)
     {
-        return [
-            'return' => [
-                'vcodres' => '0000',
-                'vdesres' => 'Cargo recibido correctamente'
-            ]
-        ];
+        $responseData = new RespuestaCargoTramite();
+        $responseData->return->vcodres = '0001';
+
+        try {
+            $api = env('SGD_WEBHOOK_URL') . '?action=cargoTramite';
+            $response = Http::post($api, $params->request);
+
+            if ($response->ok()) {
+                $data = $response->json();
+                if ($data['result']) {
+                    $responseData->return->vcodres = '0000';
+                    $responseData->return->vdesres = 'RECEPCIÓN DE CARGO EXITOSO';
+                }
+
+                return $responseData;
+            }
+
+            $responseData->return->vdesres = 'RECEPCIÓN DE CARGO CON ERROR';
+            return $responseData;
+        } catch (\Throwable $th) {
+            logger($th);
+            $responseData->return->vcodres = '-1';
+            return $responseData;
+        }
     }
 
     public function consultarTramiteResponse($params)
@@ -73,12 +92,22 @@ class TramiteService
 
                 $responseData->return->vcodres = '0000';
                 $responseData->return->vdesres = "El documento N° CUO $vcuo se encuentra a disposición para la recepción formal de la entidad destinataria $entidad en los horarios de atención de su Mesa de Partes.";
+
+                $this->sendMail($params->request, $vcuo);
+
                 return $responseData;
             }
+
             return $responseData;
         } catch (\Throwable $th) {
             logger($th);
             return $responseData;
         }
+    }
+
+    private function sendMail($data)
+    {
+        Mail::to(env('RECEPCIONAR_TRAMITE_RECIPIENT'))
+            ->send(new RecepcionarTramiteMail($data));
     }
 }

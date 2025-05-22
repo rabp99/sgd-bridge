@@ -10,7 +10,11 @@ class SoapServerController extends Controller
 {
     public function handle(Request $request)
     {
-        $nginxIp = trim(shell_exec("getent hosts sgd-bridge-nginx | awk '{ print $1 }'"));
+        if (env('APP_ENV') === 'staging') {
+            $nginxIp = '190.117.242.37:8084';
+        } else {
+            $nginxIp = trim(shell_exec("getent hosts sgd-bridge-nginx | awk '{ print $1 }'"));
+        }
 
         $wsdl = response()
             ->view('soap.wsdl', ['host' => $nginxIp])

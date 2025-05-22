@@ -54,7 +54,7 @@ class CuoService
                 ->post($url, $payload);
             if ($response->successful()) {
                 $data = $response->json();
-                if ($cuo = $data['getCUOResponse']['return']['$']) {
+                if ($cuo = $data['getCUOEntidadResponse']['return']['$']) {
                     return $cuo;
                 }
 
