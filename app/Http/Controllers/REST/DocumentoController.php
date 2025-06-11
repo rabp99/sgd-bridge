@@ -122,7 +122,7 @@ class DocumentoController extends Controller
             'vcuo' => 'required|string',
         ]);
 
-        if (env('APP_ENV') === 'local') {
+        if (env('APP_ENV') === 'local' || env('APP_ENV') === 'staging') {
             $nginxIp = trim(shell_exec("getent hosts sgd-bridge-nginx | awk '{ print $1 }'"));
             $url = 'http://' . $nginxIp . '/wsiotramite/Tramite?wsdl';
         } else {
@@ -145,7 +145,7 @@ class DocumentoController extends Controller
 
             $response = $client->consultarTramiteResponse($payload);
             $return = $response->return;
-
+            
             if ($return->vcodres === '0000') {
                 return response()->json([
                     'result' => true,
@@ -157,7 +157,7 @@ class DocumentoController extends Controller
                     'vuniorgstd' => $return->vuniorgstd,
                     'dfecregstd' => $return->dfecregstd,
                     'vusuregstd' => $return->vusuregstd,
-                    'bcarstd' => $return->bcarstd,
+                    'bcarstd' => $return->bcarstd ?? null,
                     'vobs' => $return->vobs,
                     'cflgest' => $return->cflgest,
                 ]);
