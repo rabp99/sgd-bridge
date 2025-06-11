@@ -8,6 +8,7 @@ use App\Soap\Types\RespuestaTramite;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Mail\Message;
+use App\Mail\RecepcionarTramiteMail;
 
 class TramiteService
 {
@@ -85,7 +86,6 @@ class TramiteService
         try {
             $webhook = env('SGD_WEBHOOK_URL') . '?action=recepcionarTramite';
             $response = Http::post($webhook, $params->request);
-            logger($response->body());
             if ($response->ok()) {
                 $vcuo = $params->request->vcuo;
                 $entidad = env('SGD_ENTIDAD');
@@ -93,7 +93,7 @@ class TramiteService
                 $responseData->return->vcodres = '0000';
                 $responseData->return->vdesres = "El documento N° CUO $vcuo se encuentra a disposición para la recepción formal de la entidad destinataria $entidad en los horarios de atención de su Mesa de Partes.";
 
-                $this->sendMail($params->request, $vcuo);
+                $this->sendMail($params->request);
 
                 return $responseData;
             }

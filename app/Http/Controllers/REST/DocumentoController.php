@@ -219,8 +219,8 @@ class DocumentoController extends Controller
             'ctipdociderem' => 'required|in:1,2',
             'vnumdociderem' => 'required|string',
         ]);
-
-        if (env('APP_ENV') === 'local') {
+        
+        if (env('APP_ENV') === 'local' || env('APP_ENV') === 'staging') {
             $nginxIp = trim(shell_exec("getent hosts sgd-bridge-nginx | awk '{ print $1 }'"));
             $url = 'http://' . $nginxIp . '/wsiotramite/Tramite?wsdl';
         } else {
@@ -234,12 +234,15 @@ class DocumentoController extends Controller
 
         $rucEntidadEmisora = $request->vrucentrem;
         $vcuo = null;
+
         if (env('APP_ENV') === 'local') {
             $vcuo = '123456789';
+        } elseif (env('APP_ENV') === 'staging') {
+            $vcuo = $this->cuoService->getCuoTest($rucEntidadEmisora, "3011");
         } else {
             $vcuo = $this->cuoService->getCuoEntidad($rucEntidadEmisora, "3011");
         }
-
+        
         try {
             $payload = [
                 "request" => [
@@ -266,7 +269,6 @@ class DocumentoController extends Controller
                     "vnumdociderem" => $request->vnumdociderem
                 ]
             ];
-
             $response = $client->recepcionarTramiteResponse($payload);
             $return = $response->return;
 

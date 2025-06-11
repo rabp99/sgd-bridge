@@ -10,7 +10,7 @@ class SoapServerController extends Controller
 {
     public function handle(Request $request)
     {
-        if (env('APP_ENV') === 'staging') {
+        if (env('APP_ENV') === 'staging' || env('APP_ENV') === 'production') {
             $nginxIp = '190.117.242.37:8084';
         } else {
             $nginxIp = trim(shell_exec("getent hosts sgd-bridge-nginx | awk '{ print $1 }'"));

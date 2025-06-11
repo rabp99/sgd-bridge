@@ -28,8 +28,8 @@
     <div class="container">
         <h3>Se recibió un documento:</h3>
         <p><strong>CUO:</strong> {{ $vcuo }}</p>
-        <p><strong>Entidad Remitentee:</strong> {{ $vrucentrem }} | {{ $vnomentemi }}</p>
-        <p><strong>Unidad Orgánica de la Entidad Remitentee:</strong> {{ $vuniorgrem }} | {{ $data['vnomentemi'] }}</p>
+        <p><strong>Entidad Remitente:</strong> {{ $vrucentrem }} | {{ $vnomentemi }}</p>
+        <p><strong>Unidad Orgánica de la Entidad Remitente:</strong> {{ $vuniorgrem }} | {{ $data->vnomentemi }}</p>
         <p><strong>Documento:</strong> {{ $ccodtipdocValue }}-{{ $vnumdoc }}</p>
         <p><strong>Fecha del Documento:</strong> {{ $dfecdoc }}</p>
         <p><strong>Asunto:</strong> {{ $vasu }}</p>
