@@ -119,9 +119,7 @@ class SignatureController extends Controller
         $id = $request->id;
         $queryParams = "id=$id";
 
-        // $documentTosignURL = 'http://localhost:8080/SISTRAMDOC/generate-pdf.php?id_registro=' . $idRegistro . '&area_id_doc=' . $areaIdDoc;
         $documentTosignURL = env('SGD_CLIENT_PDF_CARGO_GENERATOR_URL') . '?' . $queryParams;
-        // $uploadURL = 'http://localhost:8080/SISTRAMDOC/upload-pdf.php?id_registro=' . $idRegistro;
         $uploadURL = env('SGD_CLIENT_PDF_CARGO_UPLOADER_URL') . '?' . $queryParams;
         $imageToStampURL = env('SGD_CLIENT_IMAGE_TO_STAMP');
 

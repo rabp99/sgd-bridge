@@ -35,9 +35,10 @@ class DocumentoController extends Controller
                 'required',
                 'string',
                 function ($attribute, $value, $fail) {
-                    if (env('APP_ENV') === 'local') {
+                    if (env('APP_ENV') === 'local' || env('APP_ENV') === 'staging') {
                         return true;
                     }
+
                     $isValid = $this->entidadService->validate($value);
                     if (!$isValid) {
                         $fail("El RUC de la entidad receptora no es válido.");
@@ -52,7 +53,7 @@ class DocumentoController extends Controller
             'vuniorgstd' => 'required|string',
             'vusuregstd' => 'required|string',
             'bcarstd' => 'required|file',
-            'vobs' => 'required|string',
+            'vobs' => 'nullable|string',
             'cflgest' => [
                 'required',
                 'string',
@@ -64,7 +65,7 @@ class DocumentoController extends Controller
             ],
         ]);
 
-        if (env('APP_ENV') === 'local') {
+        if (env('APP_ENV') === 'local' || env('APP_ENV') === 'staging') {
             $nginxIp = trim(shell_exec("getent hosts sgd-bridge-nginx | awk '{ print $1 }'"));
             $url = 'http://' . $nginxIp . '/wsiotramite/Tramite?wsdl';
         } else {
@@ -93,7 +94,7 @@ class DocumentoController extends Controller
                     'cflgest' => $request->cflgest,
                 ]
             ];
-
+            
             $response = $client->cargoResponse($payload);
             $return = $response->return;
 

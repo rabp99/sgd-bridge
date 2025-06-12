@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
         //$middleware->append(RemoveHeaders::class);
         $middleware->validateCsrfTokens(except: [
             'sign',
+            'sign-cargo',
             'wsiotramite/Tramite',
         ]);
     })
