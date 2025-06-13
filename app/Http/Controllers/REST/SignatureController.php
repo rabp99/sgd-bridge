@@ -68,8 +68,8 @@ class SignatureController extends Controller
             "oneByOne" => true,
             "signatureStyle" => 1,
             "imageToStamp" => $imageToStampURL, // 'top-secret-stamp.png' here
-            "stampTextSize" => 14,
-            "stampWordWrap" => 37,
+            "stampTextSize" => 15,
+            "stampWordWrap" => 44,
             "role" => $role, // 'Analista de Servicios', // here
             "stampPage" => 1,
             "positionx" => 20,
@@ -143,8 +143,8 @@ class SignatureController extends Controller
             "oneByOne" => true,
             "signatureStyle" => 1,
             "imageToStamp" => $imageToStampURL, // 'top-secret-stamp.png' here
-            "stampTextSize" => 14,
-            "stampWordWrap" => 37,
+            "stampTextSize" => 15,
+            "stampWordWrap" => 44,
             "role" => $role, // 'Analista de Servicios', // here
             "stampPage" => 1,
             "positionx" => 20,
