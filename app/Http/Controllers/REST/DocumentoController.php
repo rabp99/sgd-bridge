@@ -69,7 +69,7 @@ class DocumentoController extends Controller
             $nginxIp = trim(shell_exec("getent hosts sgd-bridge-nginx | awk '{ print $1 }'"));
             $url = 'http://' . $nginxIp . '/wsiotramite/Tramite?wsdl';
         } else {
-            $url = "https://ws2.pide.gob.pe/services/PcmIMgdTramite?wsdl";
+            $url = env('TRAMITE_WS');
         }
 
         $client = new \SoapClient($url, [
@@ -94,7 +94,7 @@ class DocumentoController extends Controller
                     'cflgest' => $request->cflgest,
                 ]
             ];
-            
+
             $response = $client->cargoResponse($payload);
             $return = $response->return;
 
@@ -127,7 +127,7 @@ class DocumentoController extends Controller
             $nginxIp = trim(shell_exec("getent hosts sgd-bridge-nginx | awk '{ print $1 }'"));
             $url = 'http://' . $nginxIp . '/wsiotramite/Tramite?wsdl';
         } else {
-            $url = "https://ws2.pide.gob.pe/services/PcmIMgdTramite?wsdl";
+            $url = env('TRAMITE_WS');
         }
 
         $client = new \SoapClient($url, [
@@ -146,7 +146,7 @@ class DocumentoController extends Controller
 
             $response = $client->consultarTramiteResponse($payload);
             $return = $response->return;
-            
+
             if ($return->vcodres === '0000') {
                 return response()->json([
                     'result' => true,
@@ -220,12 +220,12 @@ class DocumentoController extends Controller
             'ctipdociderem' => 'required|in:1,2',
             'vnumdociderem' => 'required|string',
         ]);
-        
+
         if (env('APP_ENV') === 'local' || env('APP_ENV') === 'staging') {
             $nginxIp = trim(shell_exec("getent hosts sgd-bridge-nginx | awk '{ print $1 }'"));
             $url = 'http://' . $nginxIp . '/wsiotramite/Tramite?wsdl';
         } else {
-            $url = "https://ws2.pide.gob.pe/services/PcmIMgdTramite?wsdl";
+            $url = env('TRAMITE_WS');
         }
 
         $client = new \SoapClient($url, [
@@ -243,7 +243,7 @@ class DocumentoController extends Controller
         } else {
             $vcuo = $this->cuoService->getCuoEntidad($rucEntidadEmisora, "3011");
         }
-        
+
         try {
             $payload = [
                 "request" => [
@@ -252,7 +252,7 @@ class DocumentoController extends Controller
                     "vnomentemi" => $request->vnomentemi,
                     "vuniorgrem" => $request->vuniorgrem,
                     "vcuo" => $vcuo,
-                    "vcuoref" => $request->vcuoref,
+                    "vcuoref" => $request->vcuoref ?? '',
                     "ccodtipdoc" => $request->ccodtipdoc,
                     "vnumdoc" => $request->vnumdoc,
                     "dfecdoc" => $request->dfecdoc,
@@ -264,8 +264,8 @@ class DocumentoController extends Controller
                     "snumfol" => $request->snumfol,
                     "bpdfdoc" => base64_encode(file_get_contents($request->file('bpdfdoc')->getRealPath())),
                     "vnomdoc" => $request->vnomdoc,
-                    'lstanexos' => $request->lstanexos,
-                    "vurldocanx" => $request->vurldocanx,
+                    'lstanexos' => $request->lstanexos ?? [],
+                    "vurldocanx" => $request->vurldocanx ?? '',
                     "ctipdociderem" => $request->ctipdociderem,
                     "vnumdociderem" => $request->vnumdociderem
                 ]

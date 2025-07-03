@@ -5,6 +5,7 @@ use App\Http\Controllers\REST\SignatureController;
 use App\Http\Controllers\REST\EntidadController;
 use App\Http\Controllers\REST\CuoController;
 use App\Http\Controllers\REST\DocumentoController;
+use App\Http\Services\CuoService;
 
 Route::get('/', function () {
     return view('welcome');
@@ -29,3 +30,7 @@ Route::get('/documento/tipo-documentos', [DocumentoController::class, 'getTipos'
 Route::get('/documento/tipo-documento/{ccodtipdoc}', [DocumentoController::class, 'getTipo'])->name('documento.get-tipo');
 
 Route::post('/documentos/recepcionar-tramite', [DocumentoController::class, 'recepcionarTramite'])->name('documento.recepcionar-tramite');
+
+Route::get('/test-cuo', function (CuoService $cuoService) {
+    $cuoService->getCuoTest('20477412549', 3011);
+});

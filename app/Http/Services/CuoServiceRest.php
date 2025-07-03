@@ -4,16 +4,11 @@ namespace App\Http\Services;
 
 use Illuminate\Support\Facades\Http;
 
-class CuoService
+class CuoServiceRest
 {
     public function getCuoTest($ruc, $servicio)
     {
-        $url = env('CUO_WS');
-
-        $client = new \SoapClient($url, [
-            'trace' => 1,
-            'exceptions' => true
-        ]);
+        $url = "https://ws2.pide.gob.pe/Rest/PCM/CTest?out=json";
 
         try {
             $payload = [
@@ -22,21 +17,19 @@ class CuoService
                     "servicio" => $servicio,
                 ]
             ];
-            $response = $client->getCuo($payload);
-            $return = $response->return;
-            dd($return);
 
-            if ($return->vcodres === '0000') {
-                return response()->json([
-                    'result' => true,
-                    'message' => $return->vdesres,
-                    'vcuo' => $vcuo
-                ]);
+            $response = Http::withHeaders([
+                'Content-Type' => 'application/json; charset=UTF-8'
+            ])
+                ->post($url, $payload);
+            if ($response->successful()) {
+                $data = $response->json();
+                if ($cuo = $data['getCUOResponse']['return']['$']) {
+                    return $cuo;
+                }
+
+                throw new \Exception('No se pudo obtener el CUO.');
             }
-            return response()->json([
-                'result' => false,
-                'message' => 'No se pudo recepcionar el documento.'
-            ], 500);
         } catch (\Throwable $th) {
             logger($th);
             throw $th;
