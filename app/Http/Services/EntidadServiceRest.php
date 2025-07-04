@@ -4,17 +4,11 @@ namespace App\Http\Services;
 
 use Illuminate\Support\Facades\Http;
 
-class EntidadService
+class EntidadServiceRest
 {
     public function getList($sidcatent)
     {
-        $url = env('ENTIDAD_WS');
-
-        $client = new \SoapClient($url, [
-            'trace' => 1,
-            'exceptions' => true
-        ]);
-        dd($client->__getFunctions());
+        $url = "https://ws2.pide.gob.pe/Rest/Pcm/ListaEntidad?out=json";
 
         try {
             $payload = [
@@ -22,10 +16,6 @@ class EntidadService
                     "sidcatent" => $sidcatent
                 ]
             ];
-            $response = $client->getCuo($ip);
-            $return = $response->return;
-
-            dd($return);
 
             $response = Http::withHeaders([
                 'Content-Type' => 'application/json; charset=UTF-8'
