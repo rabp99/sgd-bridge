@@ -14,30 +14,22 @@ class EntidadService
             'trace' => 1,
             'exceptions' => true
         ]);
-        dd($client->__getFunctions());
 
         try {
             $payload = [
-                "PIDE" => [
-                    "sidcatent" => $sidcatent
-                ]
+                "sidcatent" => $sidcatent
             ];
-            $response = $client->getCuo($ip);
-            $return = $response->return;
+            $response = $client->getListaEntidad($payload);
 
-            dd($return);
-
-            $response = Http::withHeaders([
-                'Content-Type' => 'application/json; charset=UTF-8'
-            ])
-                ->post($url, $payload);
-            if ($response->successful()) {
-                $data = $response->json();
-                if ($data['getListaEntidadResponse']) {
-                    return $data['getListaEntidadResponse']['return'];
+            if ($response->return) {
+                if (is_array($response->return)) {
+                    return $response->return;
+                } else {
+                    return [$response->return];
                 }
-                throw new \Exception('No se pudo obtener la lista de Entidades.');
             }
+
+            throw new \Exception('No se pudo obtener la lista de Entidades.');
         } catch (\Throwable $th) {
             logger($th);
             throw $th;
@@ -46,26 +38,21 @@ class EntidadService
 
     public function validate($vrucent)
     {
-        $url = 'https://ws2.pide.gob.pe/Rest/Pcm/ValidarEntidad?out=json';
+        $url = env('ENTIDAD_WS');
+
+        $client = new \SoapClient($url, [
+            'trace' => 1,
+            'exceptions' => true
+        ]);
 
         try {
             $payload = [
-                "PIDE" => [
-                    "vrucent" => $vrucent
-                ]
+                "vrucent" => $vrucent
             ];
 
-            $response = Http::withHeaders([
-                'Content-Type' => 'application/json; charset=UTF-8'
-            ])
-                ->post($url, $payload);
-            if ($response->successful()) {
-                $data = $response->json();
-                if ($data['validarEntidadResponse']['return'] === '0000') {
-                    return true;
-                }
-                return false;
-            }
+            $response = $client->validarEntidad($payload);
+
+            return $response->return === '0000';
         } catch (\Throwable $th) {
             logger($th);
             throw $th;

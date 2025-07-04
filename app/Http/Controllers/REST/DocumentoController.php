@@ -290,6 +290,7 @@ class DocumentoController extends Controller
         }
     }
 
+    /*
     public function getTipos(Request $request)
     {
         $url = "https://ws2.pide.gob.pe/Rest/Pcm/TipoDocumento?out=json";
@@ -314,9 +315,33 @@ class DocumentoController extends Controller
             throw $th;
         }
     }
+    */
+
+    public function getTipos(Request $request)
+    {
+        try {
+            $list = $this->documentoService->getTipos();
+            return response()->json($list);
+        } catch (\Throwable $th) {
+            logger($th);
+            return response()->json([
+                'error' => true,
+                'message' => 'No se pudo obtener la lista.'
+            ], 400);
+        }
+    }
 
     public function getTipo(Request $request)
     {
-        $this->documentoService->getTipo($request->ccodtipdoc);
+        try {
+            $vnomtipdoctra = $this->documentoService->getTipo($request->ccodtipdoc);
+            return response()->json(compact('vnomtipdoctra'));
+        } catch (\Throwable $th) {
+            logger($th);
+            return response()->json([
+                'error' => true,
+                'message' => 'No se pudo obtener el tipo.'
+            ], 400);
+        }
     }
 }
