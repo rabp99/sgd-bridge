@@ -20,11 +20,6 @@ class EntidadService
                 "sidcatent" => $sidcatent
             ];
             $response = $client->getListaEntidad($payload);
-<<<<<<< Updated upstream
-
-=======
-            
->>>>>>> Stashed changes
             if ($response->return) {
                 if (is_array($response->return)) {
                     return $response->return;
@@ -55,11 +50,7 @@ class EntidadService
             ];
 
             $response = $client->validarEntidad($payload);
-<<<<<<< Updated upstream
-
-=======
             
->>>>>>> Stashed changes
             return $response->return === '0000';
         } catch (\Throwable $th) {
             logger($th);
