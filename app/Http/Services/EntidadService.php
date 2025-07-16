@@ -50,7 +50,6 @@ class EntidadService
             ];
 
             $response = $client->validarEntidad($payload);
-            
             return $response->return === '0000';
         } catch (\Throwable $th) {
             logger($th);
