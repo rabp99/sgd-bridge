@@ -20,7 +20,7 @@ echo "<?xml version='1.0' encoding='UTF-8'?>";
 
       <xs:complexType name="cargoResponse">
         <xs:sequence>
-          <xs:element name="cargoRequest" type="tns:CargoTramite" />
+          <xs:element name="request" type="tns:CargoTramite" />
         </xs:sequence>
       </xs:complexType>
 
@@ -55,7 +55,15 @@ echo "<?xml version='1.0' encoding='UTF-8'?>";
 
       <xs:complexType name="consultarTramiteResponse">
         <xs:sequence>
-          <xs:element name="request" type="xs:string" />
+          <xs:element minOccurs="0" name="request" type="tns:ConsultaTramite" />
+        </xs:sequence>
+      </xs:complexType>
+
+      <xs:complexType name="ConsultaTramite">
+        <xs:sequence>
+          <xs:element minOccurs="0" name="vrucentrem" type="xs:string" />
+          <xs:element minOccurs="0" name="vrucentrec" type="xs:string" />
+          <xs:element minOccurs="0" name="vcuo" type="xs:string" />
         </xs:sequence>
       </xs:complexType>
 
@@ -84,7 +92,7 @@ echo "<?xml version='1.0' encoding='UTF-8'?>";
 
       <xs:complexType name="recepcionarTramiteResponse">
         <xs:sequence>
-          <xs:element minOccurs="0" name="recepcionRequest" type="tns:RecepcionTramite" />
+          <xs:element minOccurs="0" name="request" type="tns:RecepcionTramite" />
         </xs:sequence>
       </xs:complexType>
 
@@ -116,9 +124,6 @@ echo "<?xml version='1.0' encoding='UTF-8'?>";
 
       <xs:complexType name="documentoAnexo">
         <xs:sequence>
-          <xs:element minOccurs="0" name="dfecreg" type="xs:dateTime" />
-          <xs:element name="siddocanx" type="xs:int" />
-          <xs:element name="siddocext" type="xs:int" />
           <xs:element minOccurs="0" name="vnomdoc" type="xs:string" />
         </xs:sequence>
       </xs:complexType>
