@@ -7,7 +7,6 @@ use App\Soap\Types\RespuestaCargoTramite;
 use App\Soap\Types\RespuestaTramite;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
-use Illuminate\Mail\Message;
 use App\Mail\RecepcionarTramiteMail;
 
 class TramiteService
@@ -19,7 +18,7 @@ class TramiteService
 
         try {
             $api = env('SGD_WEBHOOK_URL') . '?action=cargoTramite';
-            $response = Http::post($api, $params->request);
+            $response = Http::post($api, $params->cargoRequest);
 
             if ($response->ok()) {
                 $data = $response->json();
@@ -40,21 +39,21 @@ class TramiteService
         }
     }
 
-    public function consultarTramiteResponse($params)
+    public function consultarTramiteResponse($vcuo)
     {
         $responseData = new RespuestaConsultaTramite();
         $responseData->return->vcodres = '0001';
 
         try {
             $api = env('SGD_API_URL') . '?action=consultarTramite';
-            $response = Http::post($api, $params->request);
+            $response = Http::post($api, ['vcuo' => $vcuo]);
 
             if ($response->ok()) {
                 $data = $response->json();
                 if ($data['result']) {
                     $responseData->return->vcodres = '0000';
                     $responseData->return->vdesres = 'DATOS ENCONTRADOS';
-                    $responseData->return->vcuo = $params->request->vcuo;
+                    $responseData->return->vcuo = $vcuo;
                     $responseData->return->vcuoref = $data['vcuoref'];
                     $responseData->return->vnumregstd = $data['vnumregstd'];
                     $responseData->return->vanioregstd = $data['vanioregstd'];
@@ -80,23 +79,22 @@ class TramiteService
 
     public function recepcionarTramiteResponse($params)
     {
-        logger('test');
         $responseData = new RespuestaTramite();
         $responseData->return->vcodres = '-1';
 
         try {
             $webhook = env('SGD_WEBHOOK_URL') . '?action=recepcionarTramite';
             logger($webhook);
-            logger(json_encode($params->request));
-            $response = Http::post($webhook, $params->request);
+            logger(json_encode($params->recepcionRequest));
+            $response = Http::post($webhook, $params->recepcionRequest);
             if ($response->ok()) {
-                $vcuo = $params->request->vcuo;
+                $vcuo = $params->recepcionRequest->vcuo;
                 $entidad = env('SGD_ENTIDAD');
 
                 $responseData->return->vcodres = '0000';
                 $responseData->return->vdesres = "El documento N° CUO $vcuo se encuentra a disposición para la recepción formal de la entidad destinataria $entidad en los horarios de atención de su Mesa de Partes.";
 
-                $this->sendMail($params->request);
+                $this->sendMail($params->recepcionRequest);
 
                 return $responseData;
             }
