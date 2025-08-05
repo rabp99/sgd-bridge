@@ -241,7 +241,7 @@ class DocumentoController extends Controller
         } elseif (env('APP_ENV') === 'staging') {
             $vcuo = $this->cuoService->getCuoTest($rucEntidadEmisora, "3011");
         } else {
-            $vcuo = $this->cuoService->getCuoEntidad($rucEntidadEmisora, "3011");
+            $vcuo = $this->cuoService->getCuoTest($rucEntidadEmisora, "3011");
         }
 
         try {
@@ -252,7 +252,7 @@ class DocumentoController extends Controller
                     "vnomentemi" => $request->vnomentemi,
                     "vuniorgrem" => $request->vuniorgrem,
                     "vcuo" => $vcuo,
-                    "vcuoref" => $request->vcuoref ?? '',
+                    // "vcuoref" => $request->vcuoref ?? '',
                     "ccodtipdoc" => $request->ccodtipdoc,
                     "vnumdoc" => $request->vnumdoc,
                     "dfecdoc" => $request->dfecdoc,
@@ -271,9 +271,6 @@ class DocumentoController extends Controller
                 ]
             ];
 
-            logger($payload);
-            dd('ada');
-
             $response = $client->recepcionarTramiteResponse($payload);
             $return = $response->return;
 
@@ -284,6 +281,13 @@ class DocumentoController extends Controller
                     'vcuo' => $vcuo
                 ]);
             }
+
+            if ($response) {
+                logger(json_encode($response));
+            } else {
+                logger($client->__getLastResponse());
+            }
+            
             return response()->json([
                 'result' => false,
                 'message' => 'No se pudo recepcionar el documento.'

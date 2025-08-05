@@ -80,11 +80,14 @@ class TramiteService
 
     public function recepcionarTramiteResponse($params)
     {
+        logger('test');
         $responseData = new RespuestaTramite();
         $responseData->return->vcodres = '-1';
 
         try {
             $webhook = env('SGD_WEBHOOK_URL') . '?action=recepcionarTramite';
+            logger($webhook);
+            logger(json_encode($params->request));
             $response = Http::post($webhook, $params->request);
             if ($response->ok()) {
                 $vcuo = $params->request->vcuo;
