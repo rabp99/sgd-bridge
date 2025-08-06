@@ -145,6 +145,8 @@ class DocumentoController extends Controller
             ];
 
             $response = $client->consultarTramiteResponse($payload);
+            
+                logger($client->__getLastResponse());
             $return = $response->return;
 
             if ($return->vcodres === '0000') {

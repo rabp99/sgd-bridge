@@ -39,12 +39,13 @@ class TramiteService
         }
     }
 
-    public function consultarTramiteResponse($vcuo)
+    public function consultarTramiteResponse($params)
     {
         $responseData = new RespuestaConsultaTramite();
         $responseData->return->vcodres = '0001';
 
         try {
+            $vcuo = $params->request;
             $api = env('SGD_API_URL') . '?action=consultarTramite';
             $response = Http::post($api, ['vcuo' => $vcuo]);
 

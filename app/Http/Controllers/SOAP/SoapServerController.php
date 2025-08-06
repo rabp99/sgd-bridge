@@ -20,7 +20,7 @@ class SoapServerController extends Controller
             ->view('soap.wsdl', ['host' => $nginxIp])
             ->header('Content-Type', 'text/xml');
 
-        if ($request->has('wsdl')) {
+        if ($request->has('wsdl') && !$request->getContent()) {
             return $wsdl;
         }
 
