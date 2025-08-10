@@ -10,9 +10,11 @@ class CuoService
     {
         $url = env('CUO_WS');
 
+        ini_set('default_socket_timeout', 600);
         $client = new \SoapClient($url, [
             'trace' => 1,
-            'exceptions' => true
+            'exceptions' => true,
+            'connection_timeout' => 600
         ]);
 
         try {
@@ -37,9 +39,11 @@ class CuoService
     {
         $url = env('CUO_WS');
 
+        ini_set('default_socket_timeout', 600);
         $client = new \SoapClient($url, [
             'trace' => 1,
-            'exceptions' => true
+            'exceptions' => true,
+            'connection_timeout' => 600
         ]);
 
         try {

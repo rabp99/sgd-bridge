@@ -85,8 +85,6 @@ class TramiteService
 
         try {
             $webhook = env('SGD_WEBHOOK_URL') . '?action=recepcionarTramite';
-            logger($webhook);
-            logger(json_encode($params->recepcionRequest));
             $response = Http::post($webhook, $params->recepcionRequest);
             if ($response->ok()) {
                 $vcuo = $params->recepcionRequest->vcuo;

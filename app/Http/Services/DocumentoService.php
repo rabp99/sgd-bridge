@@ -9,9 +9,11 @@ class DocumentoService
     public function getTipos() {
         $url = env('TRAMITE_WS');
 
+        ini_set('default_socket_timeout', 600);
         $client = new \SoapClient($url, [
             'trace' => 1,
-            'exceptions' => true
+            'exceptions' => true,
+            'connection_timeout' => 600
         ]);
 
         try {
@@ -27,35 +29,6 @@ class DocumentoService
             throw $th;
         }
     }
-
-    /*
-    public function getTipo(string $ccodtipdoc)
-    {
-        $url = "https://ws2.pide.gob.pe/Rest/Pcm/TipoDocumento?out=json";
-
-        try {
-            $response = Http::withHeaders([
-                'Content-Type' => 'application/json; charset=UTF-8'
-            ])
-                ->post($url, null);
-            if ($response->successful()) {
-                $data = $response->json();
-                $tipos = $data['getTipoDocumentoResponse']['return'];
-
-                foreach ($tipos as $tipo) {
-                    if (isset($tipo['ccodtipdoctra']) && $tipo['ccodtipdoctra'] === $ccodtipdoc) {
-                        return $tipo['vnomtipdoctra'];
-                    }
-                }
-
-                return null;
-            }
-        } catch (\Throwable $th) {
-            logger($th);
-            throw $th;
-        }
-    }
-    */
 
     public function getTipo(string $ccodtipdoc) {
         try {

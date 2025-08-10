@@ -11,5 +11,6 @@ RUN apt-get update && apt-get install -y \
 RUN apt-get clean && rm -rf /var/lib/apt/lists/*
 
 COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+COPY docker/php-fpm/www.conf /usr/local/etc/php-fpm.d/www.conf
 
 WORKDIR /var/www

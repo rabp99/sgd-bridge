@@ -72,9 +72,11 @@ class DocumentoController extends Controller
             $url = env('TRAMITE_WS');
         }
 
+        ini_set('default_socket_timeout', 600);
         $client = new \SoapClient($url, [
             'trace' => 1,
-            'exceptions' => true
+            'exceptions' => true,
+            'connection_timeout' => 600
         ]);
 
         try {
@@ -130,9 +132,11 @@ class DocumentoController extends Controller
             $url = env('TRAMITE_WS');
         }
 
+        ini_set('default_socket_timeout', 600);
         $client = new \SoapClient($url, [
             'trace' => 1,
-            'exceptions' => true
+            'exceptions' => true,
+            'connection_timeout' => 600
         ]);
 
         try {
@@ -143,10 +147,9 @@ class DocumentoController extends Controller
                     'vcuo' => $request->vcuo
                 ]
             ];
-
+    
             $response = $client->consultarTramiteResponse($payload);
             
-                logger($client->__getLastResponse());
             $return = $response->return;
 
             if ($return->vcodres === '0000') {
@@ -182,7 +185,7 @@ class DocumentoController extends Controller
             'vrucentrem' => 'required|string',
             'vrucentrec' => [
                 'required',
-                'string',
+                'string'/*,
                 function ($attribute, $value, $fail) {
                     if (env('APP_ENV') === 'local') {
                         return true;
@@ -191,7 +194,7 @@ class DocumentoController extends Controller
                     if (!$isValid) {
                         $fail("El RUC de la entidad receptora no es válido.");
                     }
-                },
+                },*/
             ],
             'vnomentemi' => 'required|string',
             'vuniorgrem' => 'required|string',
@@ -230,9 +233,11 @@ class DocumentoController extends Controller
             $url = env('TRAMITE_WS');
         }
 
+        ini_set('default_socket_timeout', 600);
         $client = new \SoapClient($url, [
             'trace' => 1,
-            'exceptions' => true
+            'exceptions' => true,
+            'connection_timeout' => 600
         ]);
 
         $rucEntidadEmisora = $request->vrucentrem;
@@ -243,7 +248,11 @@ class DocumentoController extends Controller
         } elseif (env('APP_ENV') === 'staging') {
             $vcuo = $this->cuoService->getCuoTest($rucEntidadEmisora, "3011");
         } else {
-            $vcuo = $this->cuoService->getCuoTest($rucEntidadEmisora, "3011");
+            if (config('app.production_test')) {
+                $vcuo = $this->cuoService->getCuoTest($rucEntidadEmisora, "3011");
+            } else {
+                $vcuo = $this->cuoService->getCuoEntidad($rucEntidadEmisora, "3011");
+            }
         }
 
         try {
@@ -272,6 +281,8 @@ class DocumentoController extends Controller
                     "vnumdociderem" => $request->vnumdociderem
                 ]
             ];
+            logger($payload);
+            dd('aa');
             
             $response = $client->recepcionarTramiteResponse($payload);
             $return = $response->return;
@@ -295,37 +306,16 @@ class DocumentoController extends Controller
                 'message' => 'No se pudo recepcionar el documento.'
             ], 500);
         } catch (\Throwable $th) {
-            logger($th);
-            throw $th;
-        }
-    }
-
-    /*
-    public function getTipos(Request $request)
-    {
-        $url = "https://ws2.pide.gob.pe/Rest/Pcm/TipoDocumento?out=json";
-
-        try {
-            $response = Http::withHeaders([
-                'Content-Type' => 'application/json; charset=UTF-8'
-            ])
-                ->post($url, null);
-            if ($response->successful()) {
-                $data = $response->json();
-                if ($data['getTipoDocumentoResponse']) {
-                    return response()->json($data['getTipoDocumentoResponse']['return']);
-                }
-                return response()->json([
-                    'error' => true,
-                    'message' => 'No se encontraron tipo de documentos.'
-                ], 400);
+            if ($response) {
+                logger(json_encode($response));
+            } else {
+                logger($client->__getLastResponse());
             }
-        } catch (\Throwable $th) {
+            
             logger($th);
             throw $th;
         }
     }
-    */
 
     public function getTipos(Request $request)
     {
