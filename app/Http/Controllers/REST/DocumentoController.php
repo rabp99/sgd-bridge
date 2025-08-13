@@ -281,8 +281,6 @@ class DocumentoController extends Controller
                     "vnumdociderem" => $request->vnumdociderem
                 ]
             ];
-            logger($payload);
-            dd('aa');
             
             $response = $client->recepcionarTramiteResponse($payload);
             $return = $response->return;
