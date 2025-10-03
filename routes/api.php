@@ -13,6 +13,7 @@ Route::get('/', function () {
 
 Route::post('/sign', [SignatureController::class, 'sign'])->name('sign');
 Route::post('/sign-cargo', [SignatureController::class, 'signCargo'])->name('sign-cargo');
+Route::post('/sign-cargo-interno', [SignatureController::class, 'signCargoInterno'])->name('sign-cargo');
 
 Route::get('/entidad/get-list/{sidcatent}', [EntidadController::class, 'getList'])->name('entidad.get-list');
 
