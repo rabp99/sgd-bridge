@@ -3,6 +3,7 @@ services:
   sgd-bridge-app:
     build: .
     container_name: sgd-bridge-app
+    restart: "${RESTART:-no}"
     working_dir: /var/www
     volumes:
       - .:/var/www
@@ -12,6 +13,7 @@ services:
   sgd-bridge-nginx:
     image: nginx:alpine
     container_name: sgd-bridge-nginx
+    restart: "${RESTART:-no}"
     ports:
       - "8084:80"
     volumes:
