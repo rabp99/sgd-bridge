@@ -147,9 +147,9 @@ class DocumentoController extends Controller
                     'vcuo' => $request->vcuo
                 ]
             ];
-    
+
             $response = $client->consultarTramiteResponse($payload);
-            
+
             $return = $response->return;
 
             if ($return->vcodres === '0000') {
@@ -181,6 +181,10 @@ class DocumentoController extends Controller
 
     public function recepcionarTramite(Request $request)
     {
+        $data = json_decode($request->input('data'), true);
+
+        $request->merge($data);
+
         $request->validate([
             'vrucentrem' => 'required|string',
             'vrucentrec' => [
@@ -281,7 +285,7 @@ class DocumentoController extends Controller
                     "vnumdociderem" => $request->vnumdociderem
                 ]
             ];
-            
+
             $response = $client->recepcionarTramiteResponse($payload);
             $return = $response->return;
 
@@ -298,7 +302,7 @@ class DocumentoController extends Controller
             } else {
                 logger($client->__getLastResponse());
             }
-            
+
             return response()->json([
                 'result' => false,
                 'message' => 'No se pudo recepcionar el documento.'
@@ -309,7 +313,7 @@ class DocumentoController extends Controller
             } else {
                 logger($client->__getLastResponse());
             }
-            
+
             logger($th);
             throw $th;
         }
