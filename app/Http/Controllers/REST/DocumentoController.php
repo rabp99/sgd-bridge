@@ -157,7 +157,7 @@ class DocumentoController extends Controller
                     'result' => true,
                     'message' => $return->vdesres,
                     'vcuo' => $return->vcuo ?? null,
-                    'vcuoref' => $return->vcuoref,
+                    'vcuoref' => $return->vcuoref ?? null,
                     'vnumregstd' => $return->vnumregstd,
                     'vanioregstd' => $return->vanioregstd,
                     'vuniorgstd' => $return->vuniorgstd,
