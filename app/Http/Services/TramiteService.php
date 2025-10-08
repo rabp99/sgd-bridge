@@ -16,6 +16,8 @@ class TramiteService
         $responseData = new RespuestaCargoTramite();
         $responseData->return->vcodres = '0001';
 
+        logger('TramiteService::cargoResponse()');
+        logger(json_encode($params->cargoRequest));
         try {
             $api = env('SGD_WEBHOOK_URL') . '?action=cargoTramite';
             $response = Http::post($api, $params->cargoRequest);
@@ -44,6 +46,8 @@ class TramiteService
         $responseData = new RespuestaConsultaTramite();
         $responseData->return->vcodres = '0001';
 
+        logger('TramiteService::cargoResponse()');
+        logger(json_encode($params->request));
         try {
             $vcuo = $params->request;
             $api = env('SGD_API_URL') . '?action=consultarTramite';
@@ -83,6 +87,8 @@ class TramiteService
         $responseData = new RespuestaTramite();
         $responseData->return->vcodres = '-1';
 
+        logger('TramiteService::cargoResponse()');
+        logger(json_encode($params->recepcionRequest));
         try {
             $webhook = env('SGD_WEBHOOK_URL') . '?action=recepcionarTramite';
             $response = Http::post($webhook, $params->recepcionRequest);
@@ -93,7 +99,12 @@ class TramiteService
                 $responseData->return->vcodres = '0000';
                 $responseData->return->vdesres = "El documento N° CUO $vcuo se encuentra a disposición para la recepción formal de la entidad destinataria $entidad en los horarios de atención de su Mesa de Partes.";
 
-                $this->sendMail($params->recepcionRequest);
+                try {
+
+                    $this->sendMail($params->recepcionRequest);
+                } catch (\Throwable $th) {
+                    logger($th);
+                }
 
                 return $responseData;
             }
