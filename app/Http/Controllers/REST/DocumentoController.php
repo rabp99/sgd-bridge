@@ -164,7 +164,7 @@ class DocumentoController extends Controller
                     'dfecregstd' => $return->dfecregstd,
                     'vusuregstd' => $return->vusuregstd,
                     'bcarstd' => $return->bcarstd ?? null,
-                    'vobs' => $return->vobs,
+                    'vobs' => $return->vobs ?? null,
                     'cflgest' => $return->cflgest,
                 ]);
             }
