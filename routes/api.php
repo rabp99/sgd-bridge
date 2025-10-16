@@ -24,7 +24,7 @@ Route::get('/cuo/get-cuo-entidad/{ruc}/{servicio}', [CuoController::class, 'getC
 
 Route::post('/documentos/cargo-tramite', [DocumentoController::class, 'cargoTramite'])->name('documento.cargo-tramite');
 
-Route::post('/documentos/consultar-tramite', [DocumentoController::class, 'consultarTramite'])->name('cuo.get-cuo-entidad');
+Route::post('/documentos/consultar-tramite', [DocumentoController::class, 'consultarTramite'])->name('documento.consultar-tramite');
 
 Route::get('/documento/tipo-documentos', [DocumentoController::class, 'getTipos'])->name('documento.get-tipos');
 Route::get('/documento/tipo-documento/{ccodtipdoc}', [DocumentoController::class, 'getTipo'])->name('documento.get-tipo');
