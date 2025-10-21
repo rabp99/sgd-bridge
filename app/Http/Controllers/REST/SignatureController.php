@@ -156,7 +156,6 @@ class SignatureController extends Controller
 
     public function signCargoInterno(Request $request) 
     {
-        logger('test');
         $path = storage_path('app/private/fwAuthorization.json');
 
         if (!file_exists($path)) {
@@ -188,8 +187,9 @@ class SignatureController extends Controller
         $id_registro = $request->id_registro;
         $signatureReason = $request->signatureReason;
         $role = $request->role;
+        $observacion = $request->observacion;
 
-        $queryParams = "id_RegDestino=$id_RegDestino&id_registro=$id_registro&signatureReason=" . urlencode($signatureReason) . "&role=" . urlencode($role) . "&isExternal=false";
+        $queryParams = "id_RegDestino=$id_RegDestino&id_registro=$id_registro&signatureReason=" . urlencode($signatureReason) . "&role=" . urlencode($role) . "&isExternal=false&observacion=" . urlencode($observacion);
 
         $documentTosignURL = env('SGD_CLIENT_PDF_INTERNO_URL') . '?' . $queryParams;
         $uploadURL = env('SGD_CLIENT_PDF_UPLOADER_CARGO_INTERNO_URL') . '?' . $queryParams;
@@ -225,7 +225,6 @@ class SignatureController extends Controller
 
         $base64 = base64_encode(json_encode($data));
 
-        logger('test 2222');
         return response($base64)->header('Content-Type', 'text/plain');
     }
 }
