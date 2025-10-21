@@ -237,12 +237,38 @@ class DocumentoController extends Controller
             $url = env('TRAMITE_WS');
         }
 
-        ini_set('default_socket_timeout', 600);
-        $client = new \SoapClient($url, [
+        ini_set('default_socket_timeout', 60);
+
+        $soapOptions = [
             'trace' => 1,
             'exceptions' => true,
-            'connection_timeout' => 600
-        ]);
+            'cache_wsdl' => WSDL_CACHE_MEMORY,
+            'connection_timeout' => 30,
+            'compression' => SOAP_COMPRESSION_ACCEPT | SOAP_COMPRESSION_GZIP,
+            'kee_alive' => true,
+            'user_agent' => 'Apache-HttpClient/4.5.5 (Java/17.0.12)',
+            'soap_version' => SOAP_1_1,
+            'stream_context' => stream_context_create([
+                'http' => [
+                    'timeout' => 30,
+                    'user_agent' => 'Apache-HttpClient/4.5.5 (Java/17.0.12)',
+                    'header' => [
+                        'Accept-Encoding: gzip,deflate',
+                        'Connection: Keep-Alive',
+                    ]
+                ],
+                'ssl' => [
+                    'verify_peer' => false,
+                    'verify_peer_name' => false,
+                    'crypto_method' => STREAM_CRYPTO_METHOD_TLSv1_2_CLIENT,
+                ]
+            ]),
+            'encoding' => 'UTF-8',
+            'typemap' => [],
+        ];
+
+        logger($soapOptions);
+        $client = new \SoapClient($url, $soapOptions);
 
         $rucEntidadEmisora = $request->vrucentrem;
         $vcuo = null;
