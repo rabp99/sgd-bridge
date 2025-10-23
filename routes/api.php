@@ -31,3 +31,5 @@ Route::get('/documento/tipo-documentos', [DocumentoController::class, 'getTipos'
 Route::get('/documento/tipo-documento/{ccodtipdoc}', [DocumentoController::class, 'getTipo'])->name('documento.get-tipo');
 
 Route::post('/documentos/recepcionar-tramite', [DocumentoController::class, 'recepcionarTramite'])->name('documento.recepcionar-tramite');
+
+Route::post('/sistramdoc/document/create', [SistramdocDocumentController::class, 'create'])->name('sistramdoc-document.create');
