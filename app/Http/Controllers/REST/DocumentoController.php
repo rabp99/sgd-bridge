@@ -156,7 +156,7 @@ class DocumentoController extends Controller
                 return response()->json([
                     'result' => true,
                     'message' => $return->vdesres,
-                    'vcuo' => $return->vcuo ?? null,
+                    'vcuo' => $return->vcuo ?? $request->vcuo,
                     'vcuoref' => $return->vcuoref ?? null,
                     'vnumregstd' => $return->vnumregstd ?? null,
                     'vanioregstd' => $return->vanioregstd ?? null,
