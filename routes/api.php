@@ -5,6 +5,7 @@ use App\Http\Controllers\REST\SignatureController;
 use App\Http\Controllers\REST\EntidadController;
 use App\Http\Controllers\REST\CuoController;
 use App\Http\Controllers\REST\DocumentoController;
+use App\Http\Controllers\REST\SistramdocDocumentController;
 use App\Http\Services\CuoService;
 
 Route::get('/', function () {
