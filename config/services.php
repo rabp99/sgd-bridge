@@ -34,5 +34,7 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
-
+    'web-dav' => [
+        'url' => env('WEB_DAV_URL')
+    ]
 ];

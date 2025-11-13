@@ -7,24 +7,23 @@ use PhpOffice\PhpWord\IOFactory;
 use PhpOffice\PhpWord\Element\Header;
 use PhpOffice\PhpWord\TemplateProcessor;
 
-class WordService
+class WordServicecopy
 {
-    public function create($params = [], $recipientsMult = [], $refs = [])
+    public function create()
     {
         $vars = [
-            '${documentType}' => $params['document_type'], // ?? 'INFORME',
-            '${documentNumber}' =>  $params['document_number'], // ?? '0057-2025-TMT/OS',
-            '${recipientName}' => $params['recipient_name'], // ?? 'CPC. ROBERT JESUS CASTILLO SALVADOR',
-            '${recipientPosition}' => $params['recipient_position'], // ?? 'GERENTE DE ADMINISTRACION FINANZAS Y SISTEMAS',
-            '${senderName}' => $params['sender_name'], // ?? 'ING. CLODOMIRO ALEXANDER CRUZADO CHAVEZ',
-            '${senderPosition}' => $params['sender_position'], // ?? 'JEFE DE SISTEMAS',
-            '${subject}' => $params['subject'], // ?? 'PAPELETA DE DEPOSITO T-6 POR ENCARGO ECONÓMICO',
-            '${documentDate}' => $params['document_date'], // ?? 'Trujillo, 23 de octubre del 2025',
-            '${area}' => $params['area'], // ?? 'OFICINA DE SISTEMAS',
-            '${documentExpNumber}' => $params['document_exp_number'], // ?? '004253-2025',
+            '${documentType}' => 'INFORME',
+            '${documentNumber}' => '0057-2025-TMT/OS',
+            '${recipientName}' => 'CPC. ROBERT JESUS CASTILLO SALVADOR',
+            '${recipientPosition}' => 'GERENTE DE ADMINISTRACION FINANZAS Y SISTEMAS',
+            '${senderName}' => 'ING. CLODOMIRO ALEXANDER CRUZADO CHAVEZ',
+            '${senderPosition}' => 'JEFE DE SISTEMAS',
+            '${subject}' => 'PAPELETA DE DEPOSITO T-6 POR ENCARGO ECONÓMICO',
+            '${documentDate}' => 'Trujillo, 23 de octubre del 2025',
+            '${area}' => 'OFICINA DE SISTEMAS',
+            '${documentExpNumber}' => '004253-2025'
         ];
 
-        /*
         $recipientsMult = [[
             'recipientName' => 'ABOG. JUAN PÉREZ',
             'recipientPosition' => 'GERENTE DE ASESORÍA LEGAL'
@@ -38,52 +37,29 @@ class WordService
             'REF. 2',
             'REF. 3',
         ];
-        */
 
-        $templatePath = storage_path('templates/template.docx');
-        $templateContent = file_get_contents($templatePath);
+        $templatePath = 'template.docx';
+        $newPath = 'test.docx';
+        if (!copy($templatePath, $newPath)) {
+            throw new \Exception('No se pudo copiar el archivo template.');
+        }
 
-        $temp = tmpfile();
-        $meta = stream_get_meta_data($temp);
-        $tempPath = $meta['uri'];
-
-        fwrite($temp, $templateContent);
-        fflush($temp);
-
-        [$indexFirstHeader, $newFirstHeaderContent] = $this->getNewFirstHeader(
-            $vars,
-            $recipientsMult,
-            $refs
-        );
-
-        [$indexRegularHeader, $newRegularHeaderContent] = $this->getNewRegularHeader(
+        [$index, $newHeaderContent] = $this->getNewHeader(
             $vars
         );
 
         $zip = new \ZipArchive;
-        if ($zip->open($tempPath) === true) {
-            $zip->addFromString("word/header$indexFirstHeader.xml", $newFirstHeaderContent);
-            $zip->addFromString("word/header$indexRegularHeader.xml", $newRegularHeaderContent);
+        if ($zip->open($newPath) === true) {
+            $zip->addFromString("word/header$index.xml", $newHeaderContent);
 
             $zip->close();
         } else {
             throw new \Exception('No se pudo abrir el archivo DOCX.');
         }
 
-        $finalContent = file_get_contents($tempPath);
-        fclose($temp);
-
-        // file_put_contents('test.docx', $finalContent);
-
-        return $finalContent;
+        return true;
     }
 
-    private function getFirstHeaderIndex($zip)
-    {
-        return 2;
-    }
-
-    /*
     private function getHeaderIndex($zip)
     {
         $index = 1;
@@ -99,14 +75,13 @@ class WordService
 
         return $index;
     }
-    */
 
     public function edit()
     {
         $documentType = 'MEMO MULT';
         $path = 'test.docx';
 
-        [$index, $newHeaderContent] = $this->getNewFirstHeader($documentType);
+        [$index, $newHeaderContent] = $this->getNewHeader($documentType);
 
         $zip = new \ZipArchive;
         if ($zip->open($path) === true) {
@@ -120,9 +95,10 @@ class WordService
         return true;
     }
 
-    private function getNewFirstHeader($vars, $recipientsMult = [], $refs = [])
+    private function getNewHeader($vars, $recipientsMult = [], $refs = [])
     {
-        $templatePath = storage_path('templates/template.docx');
+        $templatePath = 'template.docx';
+        $index = 1;
         $newHeaderContent = '';
 
         $zip = new \ZipArchive;
@@ -130,7 +106,7 @@ class WordService
             throw new \Exception('It was not possible to open the template.');
         }
 
-        $index = $this->getFirstHeaderIndex($zip);
+        $index = $this->getHeaderIndex($zip);
         $newHeaderContent = $zip->getFromName("word/header$index.xml");
 
         if (count($recipientsMult)) {
@@ -378,9 +354,7 @@ class WordService
         $rPr = $dom->createElement('w:rPr');
 
         $sz = $dom->createElement('w:sz');
-        $b = $dom->createElement('w:b');
         $sz->setAttribute('w:val', 18);
-        $rPr->appendChild($b);
         $rPr->appendChild($sz);
 
         $textTag = $dom->createElement('w:t', 'REF.');
@@ -407,30 +381,5 @@ class WordService
         $pPr->append($tabs, $ind, $rPr);
 
         return $pPr;
-    }
-
-    private function getNewRegularHeader($vars)
-    {
-        $templatePath = storage_path('templates/template.docx');
-        $newHeaderContent = '';
-
-        $zip = new \ZipArchive;
-        if (!$zip->open($templatePath)) {
-            throw new \Exception('It was not possible to open the template.');
-        }
-
-        $index = $this->getRegularHeaderIndex($zip);
-        $newRegularHeaderContent = $zip->getFromName("word/header$index.xml");
-
-        $newHeaderContent = $this->replaceVars($newRegularHeaderContent, $vars);
-
-        $zip->close();
-
-        return [$index, $newHeaderContent];
-    }
-
-    private function getRegularHeaderIndex($zip)
-    {
-        return 1;
     }
 }
